@@ -84,7 +84,7 @@ class FDTD2dGrid:
         self.mDz1 = (1 / self.mDz0) * ((1 / self.dt) - (self.Sigma_x + self.Sigma_y) /
                                        (2 * e0) - self.Sigma_x * self.Sigma_y * self.dt / (4 * e0 ** 2))
         self.mDz2 = c0 / self.mDz0
-        self.mDz4 = (1 / self.mDz0) * (self.dt / e0 ** 2) * self.Sigma_x * self.Sigma_y  # Why 4? not 3??
+        self.mDz4 = - (1 / self.mDz0) * (self.dt / e0 ** 2) * self.Sigma_x * self.Sigma_y  # Why 4? not 3??
 
     def init_pml(self):
         """
@@ -219,7 +219,7 @@ class FDTD2dGrid:
 
 
 if __name__ == '__main__':
-    FDTD2d = FDTD2dGrid(400, 1, 200, 1, 500)
+    FDTD2d = FDTD2dGrid(400, 1, 200, 1, 1000)
     # FDTD2d.test()
     FDTD2d.run()
 
