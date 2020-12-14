@@ -172,9 +172,6 @@ class FDTD2dGrid:
         self.IDz += self.Dz
 
         # Finally we update our D field, apply soft source and update E field
-        self.Dz[:self.Npy, :self.Npx] = 0
-
-
         self.Dz = self.mDz1 * self.Dz + self.mDz2 * self.CHz + self.mDz4 * self.IDz
 
         self.Dz[80, 80] += 100 * np.exp(-(i - 30) * (i - 30) / 100)
