@@ -14,6 +14,7 @@ TODO:Please debug the boundary condition.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 # for now we use c0 = 1
 c0 = 1
@@ -110,10 +111,11 @@ class FDTD2dGrid:
             self.update_H()
             self.update_E(t)
 
-            # plot every 10 iteration
+            # plot every 20 iteration
             if (t % 20) == 0:
                 ax.cla()
-                ax.imshow(self.Ez, cmap='seismic')
+                ax.imshow(self.Ez * 80, interpolation='bilinear',
+                          vmax=1, vmin=-.05)
                 plt.title(str(t) + "/" + str(self.TimeSteps) + "Iterations.")
                 plt.pause(0.1)
 
@@ -174,7 +176,7 @@ class FDTD2dGrid:
         # Finally we update our D field, apply soft source and update E field
         self.Dz = self.mDz1 * self.Dz + self.mDz2 * self.CHz + self.mDz4 * self.IDz
 
-        self.Dz[80, 80] += 100 * np.exp(-(i - 30) * (i - 30) / 100)
+        self.Dz[80, 80] += np.exp(-(i - 30) * (i - 30) / 100)
 
         self.Ez = (1 / self.epsi) * self.Dz
 
