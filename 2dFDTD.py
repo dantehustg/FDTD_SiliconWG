@@ -36,11 +36,17 @@ class FDTD2dGrid:
         self.dy = dy
         self.TimeSteps = TimeSteps
 
-        self.dt = e0 * min(dx, dy) / (2 * c0)
+        self.dt = min(dx, dy) / (2 * c0)
 
-        # calculate grid number
+        # calculate grid number and set source position
         self.Nx = int(X / dx)
         self.Ny = int(Y / dy)
+
+        # source
+        self.srcx = 50
+        self.srcy = 50
+        self.t0 = 60
+        self.tau = 10
 
         # we only perform Ez mode
         self.Ez = np.zeros((self.Ny, self.Nx))
@@ -61,6 +67,9 @@ class FDTD2dGrid:
         # for now the epsi and mu all be one
         self.epsi = np.ones((self.Ny, self.Nx))
         self.mu = np.ones((self.Ny, self.Nx))
+
+        # add simple guide
+        self.epsi[40:60,:] = 12
 
         # initial PML condition parameters
         self.Sigma_x = np.zeros((self.Ny, self.Nx))
@@ -108,52 +117,73 @@ class FDTD2dGrid:
 
         for t in range(self.TimeSteps):
 
-            self.update_H()
+            self.update_H(t)
             self.update_E(t)
 
             # plot every 20 iteration
-            if (t % 20) == 0:
+            if (t % 10) == 0:
+                # print(np.max(self.Ez))
                 ax.cla()
-                ax.imshow(self.Ez * 80, interpolation='bilinear',
-                          vmax=1, vmin=-.05)
+                ax.imshow(self.Ez, interpolation='bilinear',
+                          vmax=0.3, vmin=-.05)
+                plt.colormaps()
                 plt.title(str(t) + "/" + str(self.TimeSteps) + "Iterations.")
                 plt.pause(0.1)
 
-    def update_curlH(self):
-        """
-        update curl H with dirichlet boundary.
-        """
-
-        self.CHz[0, 0] = (self.Hy[0, 0] - 0) / self.dx - \
-                         (self.Hx[0, 0] - 0) / self.dy
-
-        self.CHz[1:, 1:] = (self.Hy[1:, 1:] - self.Hy[1:, :-1]) / self.dx - \
-                           (self.Hx[1:, 1:] - self.Hx[:-1, 1:]) / self.dy
-
-        self.CHz[0, 1:] = (self.Hy[0, 1:] - self.Hy[0, :-1]) / self.dx - \
-                          (self.Hx[0, 1:] - 0) / self.dy
-
-        self.CHz[1:, 0] = (self.Hy[1:, 0] - 0) / self.dx - \
-                          (self.Hx[1:, 0] - self.Hx[:-1, 0]) / self.dy
-
-    def update_curlE(self):
+    def update_curlE(self, t):
         """
         update curl E with dirichlet boundary condition.
         """
         # update CEx with dirichlet boundary
         self.CEx[:-1, :] = (self.Ez[1:, :] - self.Ez[:-1, :]) / self.dy
-        self.CEx[-1, :] = (0 - self.Ez[-1, :]) / self.dy
+        # self.CEx[-1, :] = (0 - self.Ez[-1, :]) / self.dy
+        self.CEx[-1, :] = (self.Ez[0, :] - self.Ez[-1, :]) / self.dy
 
         # update CEy with dirichlet boundary
         self.CEy[:, :-1] = - (self.Ez[:, 1:] - self.Ez[:, :-1]) / self.dx
-        self.CEy[:, -1] = - (0 - self.Ez[:, -1]) / self.dx
+        # self.CEy[:, -1] = - (0 - self.Ez[:, -1]) / self.dx
+        self.CEy[:, -1] = - (self.Ez[:, 0] - self.Ez[:, -1])
 
-    def update_H(self):
+        # add TF/SF source
+        # Esrc = self.source(t)
+        # self.CEx[self.srcy-1, :] -= Esrc / self.dy
+
+    def update_curlH(self, t):
+        """
+        update curl H with dirichlet boundary.
+        """
+
+        self.CHz[1:, 1:] = (self.Hy[1:, 1:] - self.Hy[1:, :-1]) / self.dx - \
+                           (self.Hx[1:, 1:] - self.Hx[:-1, 1:]) / self.dy
+
+        # self.CHz[0, 0] = (self.Hy[0, 0] - 0) / self.dx - \
+        #                  (self.Hx[0, 0] - 0) / self.dy
+
+        self.CHz[0, 0] = (self.Hy[0, 0] - self.Hy[-1, -1]) / self.dx - \
+                         (self.Hx[0, 0] - self.Hx[-1, -1]) / self.dy
+
+        # self.CHz[0, 1:] = (self.Hy[0, 1:] - self.Hy[0, :-1]) / self.dx - \
+        #                   (self.Hx[0, 1:] - 0) / self.dy
+
+        self.CHz[0, 1:] = (self.Hy[0, 1:] - self.Hy[0, :-1]) / self.dx - \
+                          (self.Hx[0, 1:] - self.Hx[-1, 1:]) / self.dy
+
+        # self.CHz[1:, 0] = (self.Hy[1:, 0] - 0) / self.dx - \
+        #                   (self.Hx[1:, 0] - self.Hx[:-1, 0]) / self.dy
+
+        self.CHz[1:, 0] = (self.Hy[1:, 0] - self.Hy[1:, -1]) / self.dx - \
+                          (self.Hx[1:, 0] - self.Hx[:-1, 0]) / self.dy
+
+        # add TF/SF source
+        # Hsrc_1 = - np.sqrt(e0/u0) * self.source(t + e0 * u0 * self.dy / (2 * c0) + self.dt / 2)
+        # self.CHz[self.srcy, :] -= Hsrc_1 / self.dy
+
+    def update_H(self, t):
         """
         Update H field
         """
         # firstly we should update CEx and CEy
-        self.update_curlE()
+        self.update_curlE(t)
 
         # Then we update the integrations
         self.ICEx += self.CEx
@@ -163,12 +193,12 @@ class FDTD2dGrid:
         self.Hx = self.mHx1 * self.Hx + self.mHx2 * self.CEx + self.mHx3 * self.ICEx
         self.Hy = self.mHy1 * self.Hy + self.mHy2 * self.CEy + self.mHy3 * self.ICEy
 
-    def update_E(self, i):
+    def update_E(self, t):
         """
         Update E field
         """
         # Firstly we should update CHz
-        self.update_curlH()
+        self.update_curlH(t)
 
         # Then we update the integration
         self.IDz += self.Dz
@@ -176,52 +206,61 @@ class FDTD2dGrid:
         # Finally we update our D field, apply soft source and update E field
         self.Dz = self.mDz1 * self.Dz + self.mDz2 * self.CHz + self.mDz4 * self.IDz
 
-        self.Dz[80, 80] += np.exp(-(i - 30) * (i - 30) / 100)
+        # add soft source
+        # self.Dz[self.srcy:, self.srcx] += self.source(t)
+        self.Dz[40:60, 24] += self.source(t)
 
         self.Ez = (1 / self.epsi) * self.Dz
 
+    def source(self, t):
+        return np.exp(-((t - self.t0) / self.tau)**2)
+        # return np.sin(t)
+
     def test(self):
-        # self.init_pml()
-        # plt.subplot(1, 2, 1)
-        # plt.imshow(self.Sigma_x)
-        # plt.subplot(1, 2, 2)
-        # plt.imshow(self.Sigma_y)
+
+        # print(self.dt)
+        #
+        # plt.subplot(3, 4, 1)
+        # plt.imshow(self.mHx0)
+        # plt.subplot(3, 4, 2)
+        # plt.imshow(self.mHx1)
+        # plt.subplot(3, 4, 3)
+        # plt.imshow(self.mHx2)
+        # plt.subplot(3, 4, 4)
+        # plt.imshow(self.mHx3)
+        #
+        # plt.subplot(3, 4, 5)
+        # plt.imshow(self.mHy0)
+        # plt.subplot(3, 4, 6)
+        # plt.imshow(self.mHy1)
+        # plt.subplot(3, 4, 7)
+        # plt.imshow(self.mHy2)
+        # plt.subplot(3, 4, 8)
+        # plt.imshow(self.mHy3)
+        #
+        # plt.subplot(3, 4, 9)
+        # plt.imshow(self.mDz0)
+        # plt.subplot(3, 4, 10)
+        # plt.imshow(self.mDz1)
+        # plt.subplot(3, 4, 11)
+        # plt.imshow(self.mDz2)
+        # plt.subplot(3, 4, 12)
+        # plt.imshow(self.mDz4)
+        #
         # plt.show()
+        self.Dz[self.srcy, self.srcx] = 10
+        for _ in range(6):
 
-        plt.subplot(3, 4, 1)
-        plt.imshow(self.mHx0)
-        plt.subplot(3, 4, 2)
-        plt.imshow(self.mHx1)
-        plt.subplot(3, 4, 3)
-        plt.imshow(self.mHx2)
-        plt.subplot(3, 4, 4)
-        plt.imshow(self.mHx3)
+            self.update_H(_)
+            self.update_E(_)
 
-        plt.subplot(3, 4, 5)
-        plt.imshow(self.mHy0)
-        plt.subplot(3, 4, 6)
-        plt.imshow(self.mHy1)
-        plt.subplot(3, 4, 7)
-        plt.imshow(self.mHy2)
-        plt.subplot(3, 4, 8)
-        plt.imshow(self.mHy3)
-
-        plt.subplot(3, 4, 9)
-        plt.imshow(self.mDz0)
-        plt.subplot(3, 4, 10)
-        plt.imshow(self.mDz1)
-        plt.subplot(3, 4, 11)
-        plt.imshow(self.mDz2)
-        plt.subplot(3, 4, 12)
-        plt.imshow(self.mDz4)
-
-        plt.show()
+            print(self.Ez[50, 44:56])
 
         pass
 
 
 if __name__ == '__main__':
-    FDTD2d = FDTD2dGrid(400, 1, 200, 1, 1000)
+    FDTD2d = FDTD2dGrid(100, 1, 100, 1, 1000)
     # FDTD2d.test()
     FDTD2d.run()
 
