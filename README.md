@@ -13,8 +13,7 @@
 6. 打开python交互命令行，输入``import numpy, matplotlib``，没有报错，即说明环境配置成功。
 7. 在终端输入：``python ./waveguide/slabwg.py`` 运行demo, 这可能需要运行1-2分钟。
 
-代码运行的结果会在``results/slab_waveguide``中，包括最终的gif以及中间时刻的场。
-
+代码运行的结果会在``results/slab_waveguide``中，包括最终的gif以及中间时刻的场。 ``example``文件夹中有[Lumerical](https://www.lumerical.com/)和本模拟的对比图。
 ## Futher Work (TODO)
 - Modularization.
 - More simulation on different devices (e.g. photonic crystal waveguide).
