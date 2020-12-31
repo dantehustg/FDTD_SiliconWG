@@ -6,12 +6,12 @@
 使用方法，这里默认已经安装好Anaconda or Miniconda：
 
 1. 首先将代码克隆到本地：``git clone git@github.com:dantehustg/FDTD_SiliconWG.git``
-2. 克隆好以后运行命令(Linux or Window Powershell): ``cd FDTD_SilliconWG``
+2. 克隆好以后运行命令(Linux or Window Powershell): ``cd FDTD_SiliconWG``
 3. 创建运行的虚拟环境：``conda create --name fdtd_wg python=3.7``
 4. 激活虚拟环境：``conda activate fdtd_wg``
 5. 安装运行所需的包：``pip install -r requirements.txt``
 6. 打开python交互命令行，输入``import numpy, matplotlib``，没有报错，即说明环境配置成功。
-7. 在终端输入：``python ./waveguide/slabwg.py`` 运行demo
+7. 在终端输入：``python ./waveguide/slabwg.py`` 运行demo, 这可能需要运行1-2分钟。
 
 代码运行的结果会在``results/slab_waveguide``中，包括最终的gif以及中间时刻的场。
 
