@@ -19,6 +19,6 @@
 - More simulation on different devices (e.g. photonic crystal waveguide).
 
 ## Author Contribution
-**胡琪鑫 (Qixin hu)**: All this repo, including main FDTD update program, perfectly matched layers (PML), source, device, visualization and README.
+**胡琪鑫 (Qixin Hu)**: All this repo, including main FDTD update program, perfectly matched layers (PML), source, device, visualization and README.
 
 **冯德龙 (Delong Feng)**: [Lumerical](https://www.lumerical.com/) simulation and necessary discussion on FDTD update equation with PML. Add TF/SF source on [1dfdtd](./waveguide/1dfdtd.py).
