@@ -16,6 +16,6 @@
 代码运行的结果会在``results/``文件夹中，包括模拟的器件，最终的gif以及中间时刻的场。 ``example``文件夹中有[Lumerical](https://www.lumerical.com/)和本模拟的对比图。
 
 ## Author Contribution
-**胡琪鑫 (Qixin Hu)**: All this repo, including main FDTD update program, perfectly matched layers (PML), source, device, visualization and README.
+**胡琪鑫 (Qixin Hu)**: All this repo, including main FDTD(1d and 2d) update program, perfectly matched layers (PML), source, device, visualization and README.
 
 **冯德龙 (Delong Feng)**: [Lumerical](https://www.lumerical.com/) simulation and necessary discussion on FDTD update equation with PML. Add TF/SF source on [1dfdtd](./waveguide/1dfdtd.py).
