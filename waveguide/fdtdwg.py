@@ -1,15 +1,15 @@
 ###################################################
-#       FDTD Slab Sillicon Waveguide
+#       FDTD Sillicon Waveguide
 # Auther: Qixin Hu
 # Email:  hqx11@hust.edu.cn
 ###################################################
-# This program use FDTD (with PML) method to simulate
-# slab_waveguide, the results will show through .png
-# and .gif.
+# This program use 2d-FDTD (with PML) method to simulate
+# sillicon_waveguide
 ##################################################
 
 import numpy as np
 import matplotlib.pyplot as plt
+from .device import Device
 
 # Free Space permittivity, permeability and speed of light
 # real values
@@ -28,31 +28,26 @@ bound_width = int(4 * N_FACTOR)
 grid_order = 6
 
 
-class SlabWG:
-    def __init__(self):
+class FDTDWaveGuide:
+    def __init__(self, device: Device):
         # GRID parameters (Space grid step = 0.25 micrometer / N_FACTOR)
         self.da = 0.25e-6 / N_FACTOR
         # # The time grid is determed by da, S_FACTOR and c0
         self.dt = S_FACTOR * self.da / c0
         # Here we choose total time steps = 1000
-        self.STEPS = 1000
+        self.STEPS = 2000
 
         # # GRID SPACE
-        self.Y_dim = 32 * N_FACTOR
-        self.X_dim = 80 * N_FACTOR
+        self.Y_dim = device.get_Y_dim
+        self.X_dim = device.get_X_dim
 
         # wavelength
-        self.wvlen = 2  # micrometers
+        self.wvlen = 1.55  # micrometers
         self.N_lamdba = int(self.wvlen * 1e-6 / self.da)
 
-        # Index of WaveGuide(Sillicon)
-        self.index = 1.5
-
-        # Add device
-        self.epsilon = e0 * np.ones((self.X_dim, self.Y_dim))
-        self.mu = u0 * np.ones((self.X_dim, self.Y_dim))
-        self.epsilon[:, 14*N_FACTOR+1:18 *
-                     N_FACTOR] = self.index * self.index * e0
+        # Device
+        self.epsilon = device.get_epsilon
+        self.mu = device.get_mu
 
         #  Initial Grid
         self.Ez = np.zeros((self.X_dim, self.Y_dim))
@@ -93,16 +88,17 @@ class SlabWG:
         # The Ez_prop here is to store the visualization ndarray.
         self.Ez_prop = []
 
+        # Print
+        print("All the preparatory parameters are calculated and the simulation starts.........")
+
     def run(self):
-        # fig, ax = plt.subplots()
-        self.Ez[bound_width, 14*N_FACTOR] = 1
         for t in range(self.STEPS):
             self.update_H(t)
             self.update_E(t)
-
-            # 每20个time_step保存一帧
-            if (t + 1) % 20 == 0:
+            # 每40个time_step保存一帧
+            if (t + 1) % 40 == 0:
                 self.save_frame()
+                print(f'Current simulation progress: {t+1}/{self.STEPS}')
 
     def update_H(self, t):
         # update H field from E
@@ -182,42 +178,3 @@ class SlabWG:
     @property
     def get_dt(self):
         return self.dt
-
-
-if __name__ == "__main__":
-    # Run this sample
-    import os
-    import matplotlib.pyplot as plt
-    import matplotlib.animation as ani
-
-    # 首先是mkdirs
-    path = os.path.join(os.getcwd(), 'results', 'slab_waveguide')
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # 然后运行sample
-    sample = SlabWG()
-    # 这个时候已经创建好文件夹并且生成了不同时间的frame
-    sample.run()
-
-    # 接下来要制作动图
-    Ez_prop = sample.get_Ezprop
-    dt = sample.get_dt
-
-    def update(n):
-        image = plt.imshow(
-            Ez_prop[n], interpolation='bilinear', vmax=1, vmin=-0.1, cmap='plasma')
-        plt.title("FDTD with PML waveguide simulation, {:.1f}fs".format(
-            dt * n * 20 * 1e15))
-        plt.xlabel("x (0.05 um)")
-        plt.ylabel("y (0.05 um)")
-        # 将这一帧的照片也保存下来
-        plt.savefig(os.path.join(
-            'results', 'slab_waveguide', str(n*20)+'.png'))
-        return image,
-
-    fig = plt.figure()
-    animation = ani.FuncAnimation(
-        fig, update, frames=range(len(Ez_prop)), blit=True)
-    animation.save(os.path.join(path, 'Slab_WG.gif'),
-                   writer=ani.PillowWriter(fps=5))

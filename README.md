@@ -11,12 +11,9 @@
 4. 激活虚拟环境：``conda activate fdtd_wg``
 5. 安装运行所需的包：``pip install -r requirements.txt``
 6. 打开python交互命令行，输入``import numpy, matplotlib``，没有报错，即说明环境配置成功。
-7. 在终端输入：``python ./waveguide/slabwg.py`` 运行demo, 这可能需要运行1-2分钟。
+7. 在终端输入：``python demo.py`` 运行demo, 这可能需要运行2-3分钟。
 
-代码运行的结果会在``results/slab_waveguide``中，包括最终的gif以及中间时刻的场。 ``example``文件夹中有[Lumerical](https://www.lumerical.com/)和本模拟的对比图。
-## Futher Work (TODO)
-- Modularization.
-- More simulation on different devices (e.g. photonic crystal waveguide).
+代码运行的结果会在``results/``中，包括模拟的器件，最终的gif以及中间时刻的场。 ``example``文件夹中有[Lumerical](https://www.lumerical.com/)和本模拟的对比图。
 
 ## Author Contribution
 **胡琪鑫 (Qixin Hu)**: All this repo, including main FDTD update program, perfectly matched layers (PML), source, device, visualization and README.
