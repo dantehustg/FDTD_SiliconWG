@@ -13,7 +13,7 @@
 6. 打开python交互命令行，输入``import numpy, matplotlib``，没有报错，即说明环境配置成功。
 7. 在终端输入：``python demo.py`` 运行demo, 这可能需要运行2-3分钟。
 
-代码运行的结果会在``results/``中，包括模拟的器件，最终的gif以及中间时刻的场。 ``example``文件夹中有[Lumerical](https://www.lumerical.com/)和本模拟的对比图。
+代码运行的结果会在``results/``文件夹中，包括模拟的器件，最终的gif以及中间时刻的场。 ``example``文件夹中有[Lumerical](https://www.lumerical.com/)和本模拟的对比图。
 
 ## Author Contribution
 **胡琪鑫 (Qixin Hu)**: All this repo, including main FDTD update program, perfectly matched layers (PML), source, device, visualization and README.

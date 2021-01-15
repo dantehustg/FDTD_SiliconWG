@@ -19,14 +19,15 @@ class Device:
     Dielectric device.
     One function: Device.set_epsilon(height, width, loc((loc_x, loc_y)), epsilon)
     """
+
     def __init__(self, Nx, Ny):
         # Device shape
         self.X_dim = Nx
         self.Y_dim = Ny
-        
+
         # Empty device
         self.epsilon = e0 * np.ones((self.X_dim, self.Y_dim))
-        self.mu      = u0 * np.ones((self.X_dim, self.Y_dim))
+        self.mu = u0 * np.ones((self.X_dim, self.Y_dim))
 
     def set_epsilon(self, x_loc, y_loc, epsilon):
         # Change device epsilon
@@ -35,15 +36,15 @@ class Device:
     @property
     def get_epsilon(self):
         return self.epsilon
-    
+
     @property
     def get_mu(self):
         return self.mu
-    
+
     @property
     def get_X_dim(self):
         return self.X_dim
-    
+
     @property
     def get_Y_dim(self):
         return self.Y_dim
